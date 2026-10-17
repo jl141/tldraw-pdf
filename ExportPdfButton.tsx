@@ -64,8 +64,12 @@ async function exportPdf(
 			continue
 		}
 
-		// [1]
-		const exportedPng = await editor.toImage(shapesInBounds, {
+      /*
+      `editor.toImage` with `bounds` set to the page rectangle exports only that region, so the PNG
+      lines up with the PDF page. Only the annotations that overlap the page are passed in, and
+      the page image itself is excluded because it is already in the PDF.
+      */
+      const exportedPng = await editor.toImage(shapesInBounds, {
 			format: 'png',
 			background: false,
 			bounds: page.bounds,
@@ -93,10 +97,3 @@ async function exportPdf(
 	a.click()
 	URL.revokeObjectURL(url)
 }
-
-/*
-[1]
-`editor.toImage` with `bounds` set to the page rectangle exports only that region, so the PNG
-lines up with the PDF page. Only the annotations that overlap the page are passed in, and
-the page image itself is excluded because it is already in the PDF.
-*/
