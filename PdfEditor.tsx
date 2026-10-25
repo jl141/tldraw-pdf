@@ -14,6 +14,7 @@ import {
 } from 'tldraw'
 import { ExportPdfButton } from './ExportPdfButton'
 import { Pdf } from './PdfPicker'
+import { PDF_PADDING_Y, PdfScrollbar, getPdfBounds } from './PdfScrollbar'
 
 export function PdfEditor({ pdf }: { pdf: Pdf }) {
 	/*
@@ -25,6 +26,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 			PageMenu: null,
 			OnTheCanvas: () => <PageOverlayScreen pdf={pdf} />,
 			SharePanel: () => <ExportPdfButton pdf={pdf} />,
+			InFrontOfTheCanvas: () => <PdfScrollbar pdf={pdf} />,
 		}),
 		[pdf]
 	)
@@ -122,16 +124,13 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
         screens; the `react` callback re-applies the constraints when the viewport crosses that
         threshold. Returning its disposer from `onMount` stops it when the editor unmounts.
         */
-				const targetBounds = pdf.pages.reduce(
-					(acc, page) => acc.union(page.bounds),
-					pdf.pages[0].bounds.clone()
-				)
+				const targetBounds = getPdfBounds(pdf)
 
 				function updateCameraBounds(isMobile: boolean) {
 					editor.setCameraOptions({
 						constraints: {
 							bounds: targetBounds,
-							padding: { x: isMobile ? 16 : 164, y: 64 },
+							padding: { x: isMobile ? 16 : 164, y: PDF_PADDING_Y },
 							origin: { x: 0.5, y: 0 },
 							initialZoom: 'fit-x-100',
 							baseZoom: 'default',
