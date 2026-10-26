@@ -4,17 +4,22 @@ import {
 	SVGContainer,
 	TLComponents,
 	TLImageShape,
+	TLShapeId,
 	TLShapePartial,
 	Tldraw,
 	getIndicesBetween,
 	react,
-	sortByIndex,
 	track,
 	useEditor,
 } from 'tldraw'
 import { ExportPdfButton } from './ExportPdfButton'
 import type { Pdf } from '../types/pdfTypes'
-import { PDF_PADDING_Y, PdfScrollbar, getPdfBounds } from './PdfScrollbar'
+import { PdfScrollbar } from './PdfScrollbar'
+import { SCRATCH_PAGE_TYPE, ScratchPageShapeUtil } from './ScratchPageShape'
+import { ScratchPageControls } from './ScratchPageControls'
+import { applyCameraConstraints, getScratchBounds, getScratchPages } from '../utils/scratchPages'
+
+const shapeUtils = [ScratchPageShapeUtil]
 
 export function PdfEditor({ pdf }: { pdf: Pdf }) {
 	/*
@@ -26,13 +31,19 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 			PageMenu: null,
 			OnTheCanvas: () => <PageOverlayScreen pdf={pdf} />,
 			SharePanel: () => <ExportPdfButton pdf={pdf} />,
-			InFrontOfTheCanvas: () => <PdfScrollbar pdf={pdf} />,
+			InFrontOfTheCanvas: () => (
+				<>
+					<ScratchPageControls pdf={pdf} />
+					<PdfScrollbar pdf={pdf} />
+				</>
+			),
 		}),
 		[pdf]
 	)
 
 	return (
 		<Tldraw
+			shapeUtils={shapeUtils}
 			licenseKey={import.meta.env.PROD ? import.meta.env.VITE_TLDRAW_LICENSE_KEY : undefined}
 			onMount={(editor) => {
 				/*
@@ -80,7 +91,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
         can't accidentally move or delete a page.
         */
 				editor.sideEffects.registerBeforeChangeHandler('shape', (prev, next) => {
-					if (!shapeIdSet.has(next.id)) return next
+					if (!shapeIdSet.has(next.id) && next.type !== SCRATCH_PAGE_TYPE) return next
 					if (next.isLocked) return next
 					return { ...prev, isLocked: true }
 				})
@@ -90,28 +101,23 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
         that the page images still hold the lowest indexes and re-index them if not.
         */
         function makeSureShapesAreAtBottom() {
-					const shapes = shapeIds.map((id) => editor.getShape(id)!).sort(sortByIndex)
-					const pageId = editor.getCurrentPageId()
+					const isBackground = (id: TLShapeId) =>
+						shapeIdSet.has(id) || editor.getShape(id)?.type === SCRATCH_PAGE_TYPE
 
-					const siblings = editor.getSortedChildIdsForParent(pageId)
-					const currentBottomShapes = siblings
-						.slice(0, shapes.length)
-						.map((id) => editor.getShape(id)!)
+					const siblings = editor.getSortedChildIdsForParent(editor.getCurrentPageId())
+					const background = siblings.filter(isBackground)
+					const others = siblings.filter((id) => !isBackground(id))
 
-					if (currentBottomShapes.every((shape, i) => shape.id === shapes[i].id)) return
+					if (others.length === 0) return
+					if (siblings.slice(0, background.length).every(isBackground)) return
 
-					const otherSiblings = siblings.filter((id) => !shapeIdSet.has(id))
-					const bottomSibling = otherSiblings[0]
-					const lowestIndex = editor.getShape(bottomSibling)!.index
-
-					const indexes = getIndicesBetween(undefined, lowestIndex, shapes.length)
+					const lowestIndex = editor.getShape(others[0])!.index
+					const indexes = getIndicesBetween(undefined, lowestIndex, background.length)
 					editor.updateShapes(
-						shapes.map((shape, i) => ({
-							...shape,
-							id: shape.id,
-							isLocked: shape.isLocked,
-							index: indexes[i],
-						}))
+						background.map((id, i) => {
+							const shape = editor.getShape(id)!
+							return { id, type: shape.type, isLocked: shape.isLocked, index: indexes[i] }
+						})
 					)
 				}
 
@@ -125,32 +131,29 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
         screens; the `react` callback re-applies the constraints when the viewport crosses that
         threshold. Returning its disposer from `onMount` stops it when the editor unmounts.
         */
-				const targetBounds = getPdfBounds(pdf)
-
-				function updateCameraBounds(isMobile: boolean) {
-					editor.setCameraOptions({
-						constraints: {
-							bounds: targetBounds,
-							padding: { x: isMobile ? 16 : 164, y: PDF_PADDING_Y },
-							origin: { x: 0.5, y: 0 },
-							initialZoom: 'fit-x-100',
-							baseZoom: 'default',
-							behavior: 'contain',
-						},
-					})
-					editor.setCamera(editor.getCamera(), { reset: true })
-				}
-
 				let isMobile = editor.getViewportScreenBounds().width < 840
+				let boundsKey = ''
+				const scratchKey = () =>
+					getScratchPages(editor)
+						.map((shape) => `${shape.id}:${shape.x},${shape.y},${shape.props.w},${shape.props.h}`)
+						.sort()
+						.join('|')
 
+				/*
+        Scratch pages change the document bounds, so constraints are reapplied whenever they
+        change (add, delete, undo, redo, reload). Only crossing the mobile threshold resets the camera.
+        */
 				const stopReacting = react('update camera', () => {
 					const isMobileNow = editor.getViewportScreenBounds().width < 840
-					if (isMobileNow === isMobile) return
+					const key = scratchKey()
+					if (isMobileNow === isMobile && key === boundsKey) return
+					const crossedThreshold = isMobileNow !== isMobile
 					isMobile = isMobileNow
-					updateCameraBounds(isMobile)
+					boundsKey = key
+					applyCameraConstraints(editor, pdf, crossedThreshold)
 				})
 
-				updateCameraBounds(isMobile)
+				applyCameraConstraints(editor, pdf, true)
 
 				return stopReacting
 			}}
@@ -170,12 +173,10 @@ const PageOverlayScreen = track(function PageOverlayScreen({ pdf }: { pdf: Pdf }
 
 	const viewportPageBounds = editor.getViewportPageBounds()
 
-	const relevantPageBounds = pdf.pages
-		.map((page) => {
-			if (!viewportPageBounds.collides(page.bounds)) return null
-			return page.bounds
-		})
-		.filter((bounds): bounds is Box => bounds !== null)
+	const relevantPageBounds = [
+		...pdf.pages.map((page) => page.bounds),
+		...getScratchPages(editor).map((shape) => getScratchBounds(shape)),
+	].filter((bounds): bounds is Box => viewportPageBounds.collides(bounds))
 
 	function pathForPageBounds(bounds: Box) {
 		return `M ${bounds.x} ${bounds.y} L ${bounds.maxX} ${bounds.y} L ${bounds.maxX} ${bounds.maxY} L ${bounds.x} ${bounds.maxY} Z`

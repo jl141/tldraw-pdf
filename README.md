@@ -25,7 +25,7 @@ Then, I remembered tldraw. I love tldraw. It's the best canvas drawing tool I've
 
 ### Notes
 
-- Only annotations within PDF page limits will be exported.
+- Only annotations within PDF page limits will be exported. If you need more space, you can add a scratch page on either side of your pages. 
 - Reload the page to choose a different PDF.
 - Edits are saved in an in-browser IndexedDB for continued PDF editing upon page refreshes and page unloads.
 

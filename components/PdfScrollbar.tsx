@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Box, track, useEditor } from 'tldraw'
 import type { Pdf } from '../types/pdfTypes'
-
-export const PDF_PADDING_Y = 64
-
-export function getPdfBounds(pdf: Pdf) {
-	return pdf.pages.reduce((acc, page) => acc.union(page.bounds), pdf.pages[0].bounds.clone())
-}
+import { PDF_PADDING_Y, getDocumentBounds } from '../utils/scratchPages'
 
 /*
 A camera-driven scrollbar: the camera is the single source of truth. The scrollable range is the
@@ -21,7 +16,7 @@ export const PdfScrollbar = track(function PdfScrollbar({ pdf }: { pdf: Pdf }) {
 
 	const { z } = editor.getCamera()
 	const viewport = editor.getViewportPageBounds()
-	const bounds = getPdfBounds(pdf)
+	const bounds = getDocumentBounds(editor, pdf)
 	const padding = PDF_PADDING_Y / z
 	const range = new Box(bounds.x, bounds.y - padding, bounds.w, bounds.h + padding * 2)
 
