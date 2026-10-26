@@ -148,6 +148,16 @@ export function PdfPickerView({
 						{error}
 					</div>
 				)}
+				{import.meta.env.PROD && (
+					<a
+						className="PdfPicker-githubLink"
+						href="https://github.com/jl141/tldraw-pdf"
+						target="_blank"
+						rel="noreferrer"
+					>
+						View source on GitHub
+					</a>
+				)}
 			</div>
 		</div>
 	)

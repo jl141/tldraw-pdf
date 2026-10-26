@@ -33,6 +33,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 
 	return (
 		<Tldraw
+			licenseKey={import.meta.env.PROD ? import.meta.env.VITE_TLDRAW_LICENSE_KEY : undefined}
 			onMount={(editor) => {
 				/*
         Each PDF page is rendered to a PNG in PdfPicker.tsx and placed on the canvas as a locked

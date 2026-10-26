@@ -22,8 +22,13 @@ Then, I remembered tldraw. I love tldraw. It's the best canvas drawing tool I've
 
 4. Go to http://localhost:1646/ and open a PDF to edit.
 5. Button to export your PDF? Top right of your screen.
-   
+
 ### Notes
 
 - Only annotations within PDF page limits will be exported.
 - Reload the page to choose a different PDF.
+
+### About Vercel deployment
+
+- Need `VITE_TLDRAW_LICENSE_KEY` in the Vercel project's production environment variables. The license key is only passed to tldraw in production builds; local `npm run dev` does not need it.
+- Vercel Analytics and the GitHub source link are enabled in production builds and omitted from the local dev server.

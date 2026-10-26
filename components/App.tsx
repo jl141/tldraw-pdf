@@ -5,6 +5,22 @@ import type { Pdf } from '../types/pdfTypes'
 import '../styles/pdf-editor.css'
 
 const PdfEditor = lazy(() => import('./PdfEditor').then(({ PdfEditor }) => ({ default: PdfEditor })))
+const ProductionAnalytics = import.meta.env.PROD
+	? lazy(() =>
+			import('./ProductionAnalytics').then(({ ProductionAnalytics }) => ({
+				default: ProductionAnalytics,
+			}))
+		)
+	: null
+
+function ProductionAnalyticsSlot() {
+	if (!ProductionAnalytics) return null
+	return (
+		<Suspense fallback={null}>
+			<ProductionAnalytics />
+		</Suspense>
+	)
+}
 
 type State =
 	| {
@@ -37,6 +53,7 @@ export default function PdfEditorWrapper() {
 			return (
 				<div className="PdfEditor">
 					<PdfPicker onOpenPdf={(pdf) => setState({ phase: 'edit', pdf })} />
+					<ProductionAnalyticsSlot />
 				</div>
 			)
 		case 'edit':
@@ -45,6 +62,7 @@ export default function PdfEditorWrapper() {
 					<Suspense fallback={<div className="PdfEditor-loading" role="status">Loading editor…</div>}>
 						<PdfEditor pdf={state.pdf} />
 					</Suspense>
+					<ProductionAnalyticsSlot />
 				</div>
 			)
 	}

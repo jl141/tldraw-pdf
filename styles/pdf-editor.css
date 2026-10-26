@@ -25,6 +25,17 @@
 	box-shadow: var(--tl-shadow-2, 0 8px 28px rgb(0 0 0 / 8%));
 	text-align: left;
 }
+.PdfEditor .PdfPicker-githubLink {
+	display: inline-block;
+	margin-top: 1rem;
+	color: var(--tl-color-text-3, #777);
+	font-size: 0.8rem;
+	text-decoration: none;
+}
+.PdfEditor .PdfPicker-githubLink:hover {
+	color: var(--tl-color-text, #222);
+	text-decoration: underline;
+}
 .PdfEditor .PdfPicker-heading {
 	display: flex;
 	align-items: center;
