@@ -85,11 +85,10 @@ export function PdfPickerView({
 				{recents.length > 0 && (
 					<div className="PdfPicker-recents">
 						<div className="PdfPicker-divider">
-							<span>OR CONTINUE</span>
+							<span>OR CONTINUE RECENT</span>
 						</div>
 						<div className="PdfPicker-recentControls">
 							<div className="PdfPicker-recentPicker" ref={recentPickerRef}>
-								<span className="PdfPicker-fieldLabel">Recent document</span>
 								<button
 									ref={recentMenuButtonRef}
 									className="PdfPicker-selectButton"
