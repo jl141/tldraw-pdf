@@ -1,11 +1,15 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
 	Box,
+	DefaultZoomMenu,
+	DefaultZoomMenuContent,
+	Editor,
 	SVGContainer,
 	TLComponents,
 	TLImageShape,
 	TLShapeId,
 	TLShapePartial,
+	TldrawUiMenuItem,
 	Tldraw,
 	getIndicesBetween,
 	react,
@@ -15,13 +19,33 @@ import {
 import { ExportPdfButton } from './ExportPdfButton'
 import type { Pdf } from '../types/pdfTypes'
 import { PdfScrollbar } from './PdfScrollbar'
+import { PdfPageSidebar } from './PdfPageSidebar'
 import { SCRATCH_PAGE_TYPE, ScratchPageShapeUtil } from './ScratchPageShape'
 import { ScratchPageControls } from './ScratchPageControls'
-import { applyCameraConstraints, getScratchBounds, getScratchPages } from '../utils/scratchPages'
+import {
+	applyCameraConstraints,
+	getRowBounds,
+	getScratchBounds,
+	getScratchPages,
+} from '../utils/scratchPages'
+import { getCurrentPageIndex } from '../utils/pdfPages'
 
 const shapeUtils = [ScratchPageShapeUtil]
 
 export function PdfEditor({ pdf }: { pdf: Pdf }) {
+	const [editor, setEditor] = useState<Editor | null>(null)
+	const [sidebarWidth, setSidebarWidth] = useState(224)
+	const [isSidebarOpen, setIsSidebarOpen] = useState(
+		() => window.matchMedia('(min-width: 841px)').matches
+	)
+
+	useEffect(() => {
+		const media = window.matchMedia('(min-width: 841px)')
+		const onChange = (event: MediaQueryListEvent) => setIsSidebarOpen(event.matches)
+		media.addEventListener('change', onChange)
+		return () => media.removeEventListener('change', onChange)
+	}, [])
+
 	/*
   The page menu is hidden because everything lives on one page. `OnTheCanvas` draws the dimmed
   area around the PDF pages and `SharePanel` is repurposed for the export button.
@@ -31,10 +55,24 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 			PageMenu: null,
 			OnTheCanvas: () => <PageOverlayScreen pdf={pdf} />,
 			SharePanel: () => <ExportPdfButton pdf={pdf} />,
+			ZoomMenu: () => (
+				<PdfZoomMenu
+					pdf={pdf}
+					onToggleSidebar={() => setIsSidebarOpen((open) => !open)}
+				/>
+			),
 			InFrontOfTheCanvas: () => (
 				<>
 					<ScratchPageControls pdf={pdf} />
 					<PdfScrollbar pdf={pdf} />
+					<button
+						className="PdfSidebarToggle"
+						type="button"
+						aria-label="Open page thumbnails"
+						onClick={() => setIsSidebarOpen(true)}
+					>
+						Pages
+					</button>
 				</>
 			),
 		}),
@@ -42,10 +80,24 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 	)
 
 	return (
-		<Tldraw
-			shapeUtils={shapeUtils}
-			licenseKey={import.meta.env.PROD ? import.meta.env.VITE_TLDRAW_LICENSE_KEY : undefined}
-			onMount={(editor) => {
+		<div className="PdfEditor-workspace">
+			{editor && (
+				<PdfPageSidebar
+					editor={editor}
+					pdf={pdf}
+					width={sidebarWidth}
+					onWidthChange={setSidebarWidth}
+					isOpen={isSidebarOpen}
+					onOpen={() => setIsSidebarOpen(true)}
+					onClose={() => setIsSidebarOpen(false)}
+				/>
+			)}
+			<div className="PdfEditor-canvas">
+				<Tldraw
+					shapeUtils={shapeUtils}
+					licenseKey={import.meta.env.PROD ? import.meta.env.VITE_TLDRAW_LICENSE_KEY : undefined}
+					onMount={(editor) => {
+						setEditor(editor)
 				/*
         Each PDF page is rendered to a PNG in PdfPicker.tsx and placed on the canvas as a locked
         image shape backed by an image asset.
@@ -156,10 +208,44 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 				applyCameraConstraints(editor, pdf, true)
 
 				return stopReacting
-			}}
-			components={components}
-      persistenceKey={pdf.id}
-		/>
+					}}
+					components={components}
+					persistenceKey={pdf.id}
+				/>
+			</div>
+		</div>
+	)
+}
+
+function PdfZoomMenu({
+	pdf,
+	onToggleSidebar,
+}: {
+	pdf: Pdf
+	onToggleSidebar(): void
+}) {
+	const editor = useEditor()
+
+	return (
+		<DefaultZoomMenu>
+			<DefaultZoomMenuContent />
+			<TldrawUiMenuItem
+				id="pdf-zoom-to-page"
+				label="Zoom to page"
+				onSelect={() => {
+					const pageIndex = getCurrentPageIndex(editor, pdf)
+					editor.zoomToBounds(getRowBounds(editor, pdf, pageIndex), {
+						inset: 48,
+						animation: { duration: 200 },
+					})
+				}}
+			/>
+			<TldrawUiMenuItem
+				id="pdf-toggle-sidebar"
+				label="Toggle page sidebar"
+				onSelect={onToggleSidebar}
+			/>
+		</DefaultZoomMenu>
 	)
 }
 

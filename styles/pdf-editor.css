@@ -4,6 +4,199 @@
 	font-family: var(--tl-font-sans, 'tldraw_sans', sans-serif);
 }
 
+.PdfEditor-workspace {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	overflow: hidden;
+	background: var(--tl-color-background);
+}
+.PdfEditor-canvas {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+}
+.PdfEditor-canvas > div {
+	width: 100%;
+	height: 100%;
+}
+.PdfEditor .PdfPageSidebar {
+	position: relative;
+	z-index: var(--tl-layer-panels);
+	display: flex;
+	flex: 0 0 auto;
+	flex-direction: column;
+	box-sizing: border-box;
+	max-width: min(520px, calc(100vw - 120px));
+	height: 100%;
+	overflow: hidden;
+	color: var(--tl-color-text);
+	background: var(--tl-color-low);
+	border-right: 1px solid var(--tl-color-divider);
+	box-shadow: var(--tl-shadow-1);
+}
+.PdfEditor .PdfPageSidebar-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex: 0 0 auto;
+	padding: 12px 14px;
+	border-bottom: 1px solid var(--tl-color-divider);
+}
+.PdfEditor .PdfPageSidebar-heading {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+}
+.PdfEditor .PdfPageSidebar-heading span,
+.PdfEditor .PdfPageSidebar-jump small {
+	color: var(--tl-color-text-3);
+	font-size: 11px;
+}
+.PdfEditor .PdfPageSidebar-close {
+	display: none;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	color: var(--tl-color-text-2);
+	background: transparent;
+	border: 0;
+	border-radius: 6px;
+	font: inherit;
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+}
+.PdfEditor .PdfPageSidebar-close:hover {
+	background: var(--tl-color-muted-1);
+}
+.PdfEditor .PdfPageSidebar-jump {
+	display: grid;
+	gap: 6px;
+	flex: 0 0 auto;
+	padding: 12px;
+	border-bottom: 1px solid var(--tl-color-divider);
+}
+.PdfEditor .PdfPageSidebar-jump label {
+	color: var(--tl-color-text-2);
+	font-size: 11px;
+	font-weight: 600;
+}
+.PdfEditor .PdfPageSidebar-jump > div {
+	display: flex;
+	gap: 6px;
+}
+.PdfEditor .PdfPageSidebar-jump input {
+	width: 0;
+	min-width: 0;
+	flex: 1 1 auto;
+	box-sizing: border-box;
+	padding: 6px 8px;
+	color: var(--tl-color-text);
+	background: var(--tl-color-background);
+	border: 1px solid var(--tl-color-divider);
+	border-radius: 6px;
+	font: inherit;
+	font-size: 12px;
+}
+.PdfEditor .PdfPageSidebar-jump button {
+	padding: 0 10px;
+	color: var(--tl-color-text);
+	background: var(--tl-color-muted-1);
+	border: 1px solid var(--tl-color-text-3);
+	border-radius: 6px;
+	font: inherit;
+	font-size: 12px;
+	cursor: pointer;
+}
+.PdfEditor .PdfPageSidebar-jump button:hover {
+	background: var(--tl-color-muted-2);
+	border-color: var(--tl-color-text-1);
+}
+.PdfEditor .PdfPageSidebar-thumbnails {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	min-height: 0;
+	padding: 12px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+.PdfEditor .PdfPageSidebar-thumbnail {
+	display: grid;
+	width: 100%;
+	gap: 5px;
+	justify-items: center;
+	padding: 8px;
+	color: var(--tl-color-text-2);
+	background: transparent;
+	border: 2px solid transparent;
+	border-radius: 8px;
+	font: inherit;
+	font-size: 11px;
+	cursor: pointer;
+}
+.PdfEditor .PdfPageSidebar-thumbnail img {
+	display: block;
+	width: 100%;
+	max-height: 220px;
+	object-fit: contain;
+	background: var(--tl-color-muted-1);
+	box-shadow: var(--tl-shadow-1);
+}
+.PdfEditor .PdfPageSidebar-thumbnail:hover {
+	background: var(--tl-color-muted-1);
+}
+.PdfEditor .PdfPageSidebar-thumbnail[aria-current='page'] {
+	color: var(--tl-color-text);
+	background: var(--tl-color-muted-1);
+	border-color: var(--tl-color-selected);
+}
+.PdfEditor .PdfPageSidebar-resizeHandle {
+	position: absolute;
+	top: 0;
+	right: -3px;
+	bottom: 0;
+	z-index: 1;
+	width: 6px;
+	cursor: col-resize;
+	touch-action: none;
+}
+.PdfEditor .PdfPageSidebar-resizeHandle:hover,
+.PdfEditor .PdfPageSidebar[data-resizing='true'] .PdfPageSidebar-resizeHandle {
+	background: var(--tl-color-selected);
+	opacity: 0.35;
+}
+.PdfEditor .PdfPageSidebar-resizeHandle:focus-visible {
+	outline: 2px solid var(--tl-color-focus);
+	outline-offset: -2px;
+}
+.PdfEditor .PdfSidebarToggle {
+	display: none;
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	z-index: var(--tl-layer-panels);
+	padding: 8px 10px;
+	color: var(--tl-color-text);
+	background: var(--tl-color-panel);
+	border: 1px solid var(--tl-color-divider);
+	border-radius: 8px;
+	box-shadow: var(--tl-shadow-1);
+	font: inherit;
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: all;
+}
+.PdfEditor .PdfPageSidebar[data-open='false'] {
+	display: none;
+}
+
 .PdfEditor .PdfPicker {
 	position: absolute;
 	inset: 1rem;
@@ -286,6 +479,27 @@
 	}
 	.PdfEditor .PdfPicker-continueButton {
 		width: 100%;
+	}
+}
+@media (max-width: 840px) {
+	.PdfEditor .PdfPageSidebar {
+		position: absolute;
+		top: 8px;
+		bottom: 8px;
+		left: 8px;
+		width: min(280px, calc(100vw - 24px)) !important;
+		max-width: none;
+		height: auto;
+		border: 1px solid var(--tl-color-divider);
+		border-radius: 10px;
+		box-shadow: var(--tl-shadow-2);
+	}
+	.PdfEditor .PdfPageSidebar-close,
+	.PdfEditor .PdfSidebarToggle {
+		display: block;
+	}
+	.PdfEditor .PdfPageSidebar-resizeHandle {
+		display: none;
 	}
 }
 @media (prefers-reduced-motion: reduce) {
