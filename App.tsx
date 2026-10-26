@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import 'tldraw/tldraw.css'
-import { PdfEditor } from './PdfEditor'
-import { Pdf, PdfPicker } from './PdfPicker'
+import { PdfPicker } from './PdfPicker'
+import type { Pdf } from './pdfTypes'
 import './pdf-editor.css'
+
+const PdfEditor = lazy(() => import('./PdfEditor').then(({ PdfEditor }) => ({ default: PdfEditor })))
 
 type State =
 	| {
@@ -73,7 +75,9 @@ export default function PdfEditorWrapper() {
 		case 'edit':
 			return (
 				<div className="PdfEditor">
-					<PdfEditor pdf={state.pdf} />
+					<Suspense fallback={<div className="PdfEditor-loading" role="status">Loading editor…</div>}>
+						<PdfEditor pdf={state.pdf} />
+					</Suspense>
 					{showLeaveConfirmation && (
 						<div className="LeaveConfirmation-backdrop">
 							<section

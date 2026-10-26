@@ -1,26 +1,35 @@
 import PdfJSWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
-import { useState } from 'react'
-import { AssetRecordType, Box, TLAssetId, TLShapeId, createShapeId } from 'tldraw'
-
-export interface PdfPage {
-	src: string
-	bounds: Box
-	assetId: TLAssetId
-	shapeId: TLShapeId
-}
-
-export interface Pdf {
-	name: string
-	pages: PdfPage[]
-	source: string | ArrayBuffer
-}
+import { useEffect, useState } from 'react'
+import { PdfPickerView } from './PdfPickerView'
+import type { Pdf, PdfPage } from './pdfTypes'
+import {
+	type RecentPdf,
+	canPersistFiles,
+	forgetRecentPdf,
+	listRecentPdfs,
+	pickPdfHandle,
+	saveRecentPdf,
+} from './recentPdfs'
 
 const pageSpacing = 32
 
 export function PdfPicker({ onOpenPdf }: { onOpenPdf(pdf: Pdf): void }) {
 	const [isLoading, setIsLoading] = useState(false)
+	const [recents, setRecents] = useState<RecentPdf[]>([])
+	const [selectedId, setSelectedId] = useState('')
+	const [error, setError] = useState<string | null>(null)
 
-	async function loadPdf(name: string, source: ArrayBuffer): Promise<Pdf> {
+	function refreshRecents() {
+		if (!canPersistFiles) return
+		listRecentPdfs().then((list) => {
+			setRecents(list)
+			setSelectedId((id) => (list.some((r) => r.id === id) ? id : (list[0]?.id ?? '')))
+		})
+	}
+	useEffect(refreshRecents, [])
+
+	async function loadPdf(id: string, name: string, source: ArrayBuffer): Promise<Pdf> {
+		const { AssetRecordType, Box, createShapeId } = await import('tldraw')
 		const PdfJS = await import('pdfjs-dist')
 		PdfJS.GlobalWorkerOptions.workerSrc = PdfJSWorkerSrc
 
@@ -52,8 +61,8 @@ export function PdfPicker({ onOpenPdf }: { onOpenPdf(pdf: Pdf): void }) {
 			pages.push({
 				src: canvas.toDataURL(),
 				bounds: new Box(0, top, width, height),
-				assetId: AssetRecordType.createId(),
-				shapeId: createShapeId(),
+				assetId: AssetRecordType.createId(`${id}-page-${i}`),
+				shapeId: createShapeId(`${id}-page-${i}`),
 			})
 			top += height + pageSpacing
 			widest = Math.max(widest, width)
@@ -66,39 +75,76 @@ export function PdfPicker({ onOpenPdf }: { onOpenPdf(pdf: Pdf): void }) {
 		}
 
 		return {
+			id,
 			name,
 			pages,
 			source,
 		}
 	}
 
-	function onClickOpenPdf() {
+	async function openFile(id: string, file: File) {
+		setIsLoading(true)
+		try {
+			onOpenPdf(await loadPdf(id, file.name, await file.arrayBuffer()))
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	async function onClickOpenPdf() {
+		setError(null)
+		if (canPersistFiles) {
+			const handle = await pickPdfHandle()
+			if (!handle) return
+			const file = await handle.getFile()
+			await openFile(await saveRecentPdf(handle), file)
+			return
+		}
+
+		// Browsers without the File System Access API can't remember files, so key by file identity.
 		const input = window.document.createElement('input')
 		input.type = 'file'
 		input.accept = 'application/pdf'
-		input.addEventListener('change', async (e) => {
-			const fileList = (e.target as HTMLInputElement).files
-			if (!fileList || fileList.length === 0) return
-			const file = fileList[0]
-
-			setIsLoading(true)
-			try {
-				const pdf = await loadPdf(file.name, await file.arrayBuffer())
-				onOpenPdf(pdf)
-			} finally {
-				setIsLoading(false)
-			}
+		input.addEventListener('change', () => {
+			const file = input.files?.[0]
+			if (file) openFile(`${file.name}-${file.size}-${file.lastModified}`, file)
 		})
 		input.click()
 	}
 
-	if (isLoading) {
-		return <div className="PdfPicker">Loading...</div>
+	async function onClickContinue() {
+		const recent = recents.find((r) => r.id === selectedId)
+		if (!recent) return
+		setError(null)
+		try {
+			const handle = recent.handle
+			if ((await handle.requestPermission({ mode: 'read' })) !== 'granted') {
+				setError('Permission to read the file was denied.')
+				return
+			}
+			const file = await handle.getFile()
+			await saveRecentPdf(handle)
+			await openFile(recent.id, file)
+		} catch (e) {
+			if ((e as DOMException).name !== 'NotFoundError') {
+				setError(`Could not open "${recent.name}": ${(e as Error).message}`)
+				return
+			}
+			await forgetRecentPdf(recent.id)
+			setError(`"${recent.name}" was moved or deleted. Its saved annotations were removed.`)
+			refreshRecents()
+		}
 	}
 
 	return (
-		<div className="PdfPicker">
-			<button onClick={onClickOpenPdf}>Open PDF</button>
-		</div>
+		<PdfPickerView
+			isLoading={isLoading}
+			recents={recents}
+			selectedId={selectedId}
+			error={error}
+			onOpenFile={() => void onClickOpenPdf()}
+			onContinue={() => void onClickContinue()}
+			onSelectRecent={setSelectedId}
+		/>
 	)
 }

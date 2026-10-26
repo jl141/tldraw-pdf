@@ -13,7 +13,7 @@ import {
 	useEditor,
 } from 'tldraw'
 import { ExportPdfButton } from './ExportPdfButton'
-import { Pdf } from './PdfPicker'
+import type { Pdf } from './pdfTypes'
 import { PDF_PADDING_Y, PdfScrollbar, getPdfBounds } from './PdfScrollbar'
 
 export function PdfEditor({ pdf }: { pdf: Pdf }) {
@@ -39,7 +39,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
         image shape backed by an image asset.
         */
 				editor.createAssets(
-					pdf.pages.map((page) => ({
+					pdf.pages.filter((page) => !editor.getAsset(page.assetId)).map((page) => ({
 						id: page.assetId,
 						typeName: 'asset',
 						type: 'image',
@@ -55,7 +55,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 					}))
 				)
 				editor.createShapes(
-					pdf.pages.map(
+					pdf.pages.filter((page) => !editor.getShape(page.shapeId)).map(
 						(page): TLShapePartial<TLImageShape> => ({
 							id: page.shapeId,
 							type: 'image',
@@ -154,6 +154,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 				return stopReacting
 			}}
 			components={components}
+      persistenceKey={pdf.id}
 		/>
 	)
 }

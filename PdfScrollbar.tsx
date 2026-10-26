@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Box, track, useEditor } from 'tldraw'
-import { Pdf } from './PdfPicker'
+import type { Pdf } from './pdfTypes'
 
 export const PDF_PADDING_Y = 64
 
