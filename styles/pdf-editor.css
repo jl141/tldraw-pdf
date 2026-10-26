@@ -368,9 +368,12 @@
 	width: 12px;
 	height: 12px;
 }
-.PdfEditor .ScratchPageStrip:hover,
-.PdfEditor .ScratchPageStrip:focus-visible {
+.PdfEditor .ScratchPageStrip:hover {
 	background: color-mix(in srgb, var(--tl-color-text-3, #888) 35%, transparent);
+}
+.PdfEditor .ScratchPageStrip:focus-visible {
+	outline: 2px solid var(--tl-color-focus);
+	outline-offset: 1px;
 }
 .PdfEditor .ScratchPageStrip[data-delete='true']:hover {
 	background: color-mix(in srgb, var(--tl-color-danger, #e03131) 45%, transparent);

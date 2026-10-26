@@ -172,10 +172,13 @@ const PageOverlayScreen = track(function PageOverlayScreen({ pdf }: { pdf: Pdf }
 	const editor = useEditor()
 
 	const viewportPageBounds = editor.getViewportPageBounds()
+	const scratchPages = getScratchPages(editor).filter((shape) =>
+		viewportPageBounds.collides(getScratchBounds(shape))
+	)
 
 	const relevantPageBounds = [
 		...pdf.pages.map((page) => page.bounds),
-		...getScratchPages(editor).map((shape) => getScratchBounds(shape)),
+		...scratchPages.map((shape) => getScratchBounds(shape)),
 	].filter((bounds): bounds is Box => viewportPageBounds.collides(bounds))
 
 	function pathForPageBounds(bounds: Box) {
@@ -191,6 +194,16 @@ const PageOverlayScreen = track(function PageOverlayScreen({ pdf }: { pdf: Pdf }
 					d={`${viewportPath} ${relevantPageBounds.map(pathForPageBounds).join(' ')}`}
 					fillRule="evenodd"
 				/>
+				{scratchPages.map((shape) => (
+					<rect
+						key={shape.id}
+						x={shape.x}
+						y={shape.y}
+						width={shape.props.w}
+						height={shape.props.h}
+						fill="#fff"
+					/>
+				))}
 			</SVGContainer>
 			{relevantPageBounds.map((bounds, i) => (
 				<div

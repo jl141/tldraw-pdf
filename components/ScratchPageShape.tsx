@@ -44,9 +44,7 @@ export class ScratchPageShapeUtil extends ShapeUtil<ScratchPageShape> {
 
 	component(shape: ScratchPageShape) {
 		return (
-			<HTMLContainer
-				style={{ width: shape.props.w, height: shape.props.h, background: '#fff' }}
-			/>
+			<HTMLContainer style={{ width: shape.props.w, height: shape.props.h }} />
 		)
 	}
 
