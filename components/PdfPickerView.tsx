@@ -27,7 +27,7 @@ export function PdfPickerView({
 	onSelectRecent,
 }: PdfPickerViewProps) {
 	const [isRecentMenuOpen, setIsRecentMenuOpen] = useState(false)
-	const pickerRef = useRef<HTMLDivElement>(null)
+	const recentPickerRef = useRef<HTMLDivElement>(null)
 	const recentMenuButtonRef = useRef<HTMLButtonElement>(null)
 	const selectedRecent = recents.find((recent) => recent.id === selectedId)
 
@@ -35,7 +35,7 @@ export function PdfPickerView({
 		if (!isRecentMenuOpen) return
 
 		function onPointerDown(event: PointerEvent) {
-			if (!pickerRef.current?.contains(event.target as Node)) {
+			if (!recentPickerRef.current?.contains(event.target as Node)) {
 				setIsRecentMenuOpen(false)
 			}
 		}
@@ -68,7 +68,7 @@ export function PdfPickerView({
 
 	return (
 		<div className="PdfPicker">
-			<div className="PdfPicker-card" ref={pickerRef}>
+			<div className="PdfPicker-card">
 				<div className="PdfPicker-heading">
 					<div className="PdfPicker-icon" aria-hidden="true">
 						<img src={documentIcon} alt="" />
@@ -88,7 +88,7 @@ export function PdfPickerView({
 							<span>OR CONTINUE</span>
 						</div>
 						<div className="PdfPicker-recentControls">
-							<div className="PdfPicker-recentPicker">
+							<div className="PdfPicker-recentPicker" ref={recentPickerRef}>
 								<span className="PdfPicker-fieldLabel">Recent document</span>
 								<button
 									ref={recentMenuButtonRef}
