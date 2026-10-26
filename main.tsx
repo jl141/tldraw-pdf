@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import PdfEditorWrapper from './App'
+import PdfEditorWrapper from './components/App'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

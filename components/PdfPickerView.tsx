@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import type { RecentPdf } from './recentPdfs'
-import documentIcon from './assets/document.svg'
-import uploadIcon from './assets/upload.svg'
-import fileIcon from './assets/file.svg'
-import chevronIcon from './assets/chevron.svg'
-import checkIcon from './assets/check.svg'
-import arrowRightIcon from './assets/arrow-right.svg'
+import type { RecentPdf } from '../types/pdfTypes'
+import documentIcon from '../assets/document.svg'
+import uploadIcon from '../assets/upload.svg'
+import fileIcon from '../assets/file.svg'
+import chevronIcon from '../assets/chevron.svg'
+import checkIcon from '../assets/check.svg'
+import arrowRightIcon from '../assets/arrow-right.svg'
 
 interface PdfPickerViewProps {
 	isLoading: boolean

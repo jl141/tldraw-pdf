@@ -1,8 +1,8 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import 'tldraw/tldraw.css'
 import { PdfPicker } from './PdfPicker'
-import type { Pdf } from './pdfTypes'
-import './pdf-editor.css'
+import type { Pdf } from '../types/pdfTypes'
+import '../styles/pdf-editor.css'
 
 const PdfEditor = lazy(() => import('./PdfEditor').then(({ PdfEditor }) => ({ default: PdfEditor })))
 

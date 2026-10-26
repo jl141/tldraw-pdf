@@ -1,15 +1,14 @@
 import PdfJSWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { useEffect, useState } from 'react'
 import { PdfPickerView } from './PdfPickerView'
-import type { Pdf, PdfPage } from './pdfTypes'
+import type { Pdf, PdfPage, RecentPdf } from '../types/pdfTypes'
 import {
-	type RecentPdf,
 	canPersistFiles,
 	forgetRecentPdf,
 	listRecentPdfs,
 	pickPdfHandle,
 	saveRecentPdf,
-} from './recentPdfs'
+} from '../utils/recentPdfs'
 
 const pageSpacing = 32
 

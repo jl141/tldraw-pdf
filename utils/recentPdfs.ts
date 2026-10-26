@@ -1,18 +1,4 @@
-// File System Access API types (Chromium only; not in TypeScript's DOM lib)
-export interface PdfFileHandle {
-	name: string
-	getFile(): Promise<File>
-	isSameEntry(other: PdfFileHandle): Promise<boolean>
-	queryPermission(opts: { mode: 'read' }): Promise<PermissionState>
-	requestPermission(opts: { mode: 'read' }): Promise<PermissionState>
-}
-
-export interface RecentPdf {
-	id: string
-	name: string
-	handle: PdfFileHandle
-	lastOpened: number
-}
+import type { PdfFileHandle, RecentPdf } from '../types/pdfTypes'
 
 const DB_NAME = 'pdf-editor-recent'
 const STORE = 'recent'

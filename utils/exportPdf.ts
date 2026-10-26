@@ -1,6 +1,6 @@
 import { PDFDocument } from 'pdf-lib'
 import type { Editor } from 'tldraw'
-import type { Pdf } from './pdfTypes'
+import type { Pdf } from '../types/pdfTypes'
 
 export async function exportPdf(
 	editor: Editor,

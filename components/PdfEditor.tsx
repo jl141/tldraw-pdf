@@ -13,7 +13,7 @@ import {
 	useEditor,
 } from 'tldraw'
 import { ExportPdfButton } from './ExportPdfButton'
-import type { Pdf } from './pdfTypes'
+import type { Pdf } from '../types/pdfTypes'
 import { PDF_PADDING_Y, PdfScrollbar, getPdfBounds } from './PdfScrollbar'
 
 export function PdfEditor({ pdf }: { pdf: Pdf }) {
