@@ -3,7 +3,7 @@
 ### Background
 I wanted a way to annotate PDFs that had a better UX than MacOS Preview, but couldn't find any satisfactory alternatives. 
 
-Then, I remembered tldraw. I love tldraw. It's the best canvas drawing tool I've seen. I use it to teach, brainstorm, and organize thoughts. tldraw doesn't support PDF imports on their webapp but they do provide a [PDF editor example](https://tldraw.dev/examples/pdf-editor)! I just took their code and put some scaffolding around it so I can run it locally.
+Then, I remembered tldraw. I love tldraw. It's the best canvas drawing tool I've seen. I use it to teach, brainstorm, and organize thoughts. tldraw doesn't support PDF imports on their webapp but they do provide a [PDF editor example!](https://tldraw.dev/examples/pdf-editor) I just took their code and put some scaffolding around it so I can run it locally.
 
 ### How to run
 
@@ -27,6 +27,7 @@ Then, I remembered tldraw. I love tldraw. It's the best canvas drawing tool I've
 
 - Only annotations within PDF page limits will be exported.
 - Reload the page to choose a different PDF.
+- Edits are saved in an in-browser IndexedDB for continued PDF editing upon page refreshes and page unloads.
 
 ### About Vercel deployment
 
