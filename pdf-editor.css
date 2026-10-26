@@ -313,68 +313,6 @@
 	filter: brightness(1.1);
 }
 
-.PdfEditor .LeaveConfirmation-backdrop {
-	position: fixed;
-	inset: 0;
-	display: grid;
-	place-items: center;
-	padding: 1rem;
-	background: rgb(0 0 0 / 40%);
-	z-index: 10000;
-}
-
-.PdfEditor .LeaveConfirmation-dialog {
-	width: min(100%, 24rem);
-	padding: 1.25rem;
-	color: var(--color-text, var(--tl-color-text, #222));
-	background: var(--color-panel, var(--tl-color-panel, #fff));
-	border: 1px solid var(--color-muted-2, #ddd);
-	border-radius: var(--radius-3, 10px);
-	box-shadow: var(--shadow-3, var(--tl-shadow-2));
-}
-
-.PdfEditor .LeaveConfirmation-dialog h2 {
-	margin: 0 0 0.5rem;
-	font-size: 1.125rem;
-}
-
-.PdfEditor .LeaveConfirmation-dialog p {
-	margin: 0;
-	color: var(--color-muted-1, #666);
-	line-height: 1.5;
-}
-
-.PdfEditor .LeaveConfirmation-actions {
-	display: flex;
-	justify-content: flex-end;
-	gap: 0.5rem;
-	margin-top: 1.25rem;
-}
-
-.PdfEditor .LeaveConfirmation-actions button {
-	padding: 0.5rem 0.875rem;
-	color: var(--color-text, var(--tl-color-text, #222));
-	font: inherit;
-	background: var(--color-panel, #fff);
-	border: 1px solid var(--color-muted-2, #ddd);
-	border-radius: var(--radius-2, 6px);
-	cursor: pointer;
-}
-
-.PdfEditor .LeaveConfirmation-actions button:hover {
-	background: var(--color-muted-1, #f2f2f2);
-}
-
-.PdfEditor .LeaveConfirmation-actions .LeaveConfirmation-leave {
-	color: var(--color-panel, #fff);
-	background: var(--color-text, #222);
-	border-color: transparent;
-}
-
-.PdfEditor .LeaveConfirmation-actions .LeaveConfirmation-leave:hover {
-	filter: brightness(1.15);
-}
-
 .PdfEditor .PdfScrollbar {
 	position: absolute;
 	top: 0;
