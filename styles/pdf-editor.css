@@ -48,6 +48,24 @@
 	align-items: center;
 	font-size: 14px;
 }
+.PdfEditor .PdfPageSidebar-closeButton {
+	width: 16px;
+	height: 16px;
+	min-width: 16px;
+	padding: 4px;
+	box-sizing: border-box;
+	flex: 0 0 16px;
+	aspect-ratio: 1;
+  border-radius: 4px;
+}.PdfEditor .PdfPageSidebar-closeButton:hover {
+  filter: brightness(1.5);
+}
+.PdfEditor .PdfPageSidebar-closeButton img {
+	display: block;
+	width: 20px;
+	height: 20px;
+	transform: translateX(-5%) rotate(90deg) ;
+}
 .PdfEditor .PdfPageSidebar-jump {
 	display: flex;
 	align-items: center;

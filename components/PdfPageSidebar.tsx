@@ -4,6 +4,7 @@ import { TldrawUiButton, TldrawUiButtonLabel } from 'tldraw'
 import type { Editor } from 'tldraw'
 import type { Pdf } from '../types/pdfTypes'
 import { getCurrentPageIndex } from '../utils/pdfPages'
+import chevronIcon from '../assets/chevron.svg'
 
 const MAX_SIDEBAR_WIDTH = 320
 
@@ -60,6 +61,13 @@ export function PdfPageSidebar({
 
 	useEffect(() => {
 		function onKeyDown(event: KeyboardEvent) {
+			if ((event.metaKey || event.ctrlKey) && event.altKey && event.code === 'Digit1' && isOpen) {
+				event.preventDefault()
+				event.stopPropagation()
+				onClose()
+				return
+			}
+
 			if ((event.metaKey || event.ctrlKey) && event.altKey && event.code === 'KeyG') {
 				event.preventDefault()
 				event.stopPropagation()
@@ -76,7 +84,7 @@ export function PdfPageSidebar({
 
 		document.addEventListener('keydown', onKeyDown, true)
 		return () => document.removeEventListener('keydown', onKeyDown, true)
-	}, [currentPage, isEditingPage, isOpen, onOpen])
+	}, [currentPage, isEditingPage, isOpen, onClose, onOpen])
 
 	useEffect(() => {
 		if (!isResizing) return
@@ -180,6 +188,15 @@ export function PdfPageSidebar({
 				<div className="PdfPageSidebar-heading">
 					<strong>Page Previews</strong>
 				</div>
+				<TldrawUiButton
+					className="PdfPageSidebar-closeButton"
+					type="normal"
+					title={isMacOS ? 'Close sidebar — ⌘⌥1' : 'Close sidebar'}
+					aria-label="Close sidebar"
+					onClick={onClose}
+				>
+					<img src={chevronIcon} alt="" aria-hidden="true" />
+				</TldrawUiButton>
 			</header>
 			<form className="PdfPageSidebar-jump" onSubmit={handlePageSubmit}>
 				<span>Page</span>
