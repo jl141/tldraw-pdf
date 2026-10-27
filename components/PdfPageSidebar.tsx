@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, PointerEvent as ReactPointerEvent } from 'react'
+import { TldrawUiButton, TldrawUiButtonLabel } from 'tldraw'
 import type { Editor } from 'tldraw'
 import type { Pdf } from '../types/pdfTypes'
 import { getCurrentPageIndex } from '../utils/pdfPages'
+
+const MAX_SIDEBAR_WIDTH = 320
+
+function getMaxSidebarWidth() {
+	return Math.min(MAX_SIDEBAR_WIDTH, Math.max(240, window.innerWidth - 120))
+}
 
 interface PdfPageSidebarProps {
 	editor: Editor
@@ -24,11 +31,12 @@ export function PdfPageSidebar({
 	onClose,
 }: PdfPageSidebarProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
-	const focusInputOnOpen = useRef(false)
 	const drag = useRef<{ pointerX: number; width: number } | null>(null)
 	const [currentPage, setCurrentPage] = useState(0)
 	const [pageInput, setPageInput] = useState('')
+	const [isEditingPage, setIsEditingPage] = useState(false)
 	const [isResizing, setIsResizing] = useState(false)
+	const isMacOS = navigator.platform.startsWith('Mac')
 
 	useEffect(() => {
 		function updateCurrentPage() {
@@ -41,37 +49,37 @@ export function PdfPageSidebar({
 	}, [editor, pdf])
 
 	useEffect(() => {
-		if (!isOpen || !focusInputOnOpen.current) return
-		focusInputOnOpen.current = false
+		if (!isOpen || !isEditingPage) return
 		inputRef.current?.focus()
 		inputRef.current?.select()
-	}, [isOpen])
+	}, [isOpen, isEditingPage])
 
 	useEffect(() => {
 		function onKeyDown(event: KeyboardEvent) {
 			if ((event.metaKey || event.ctrlKey) && event.altKey && event.code === 'KeyG') {
 				event.preventDefault()
 				event.stopPropagation()
+				setPageInput(String(currentPage + 1))
+				setIsEditingPage(true)
 				if (!isOpen) {
-					focusInputOnOpen.current = true
 					onOpen()
-					return
+				} else if (isEditingPage) {
+					inputRef.current?.focus()
+					inputRef.current?.select()
 				}
-				inputRef.current?.focus()
-				inputRef.current?.select()
 			}
 		}
 
 		document.addEventListener('keydown', onKeyDown, true)
 		return () => document.removeEventListener('keydown', onKeyDown, true)
-	}, [isOpen, onOpen])
+	}, [currentPage, isEditingPage, isOpen, onOpen])
 
 	useEffect(() => {
 		if (!isResizing) return
 
 		function onPointerMove(event: PointerEvent) {
 			if (!drag.current) return
-			const maxWidth = Math.min(520, Math.max(240, window.innerWidth - 120))
+			const maxWidth = getMaxSidebarWidth()
 			onWidthChange(Math.min(Math.max(drag.current.width + event.clientX - drag.current.pointerX, 180), maxWidth))
 		}
 
@@ -103,13 +111,18 @@ export function PdfPageSidebar({
 			{ animation: { duration: 240 } }
 		)
 		setPageInput(String(pageNumber))
+		setIsEditingPage(false)
 	}
 
-	function submitPage(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault()
+	function submitPage() {
 		const requestedPage = Number(pageInput)
 		if (!Number.isInteger(requestedPage) || requestedPage < 1) return
 		goToPage(Math.min(requestedPage, pdf.pages.length))
+	}
+
+	function handlePageSubmit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault()
+		submitPage()
 	}
 
 	function startResize(event: ReactPointerEvent<HTMLDivElement>) {
@@ -125,7 +138,7 @@ export function PdfPageSidebar({
 			className="PdfPageSidebar"
 			data-open={isOpen}
 			data-resizing={isResizing}
-			style={{ width }}
+			style={{ width, maxWidth: getMaxSidebarWidth() }}
 			aria-label="PDF pages"
 			onPointerDown={(event) => event.stopPropagation()}
 			onWheel={(event) => event.stopPropagation()}
@@ -134,49 +147,83 @@ export function PdfPageSidebar({
 				<div className="PdfPageSidebar-heading">
 					<strong>Page Previews</strong>
 				</div>
-				<button
-					className="PdfPageSidebar-close"
-					type="button"
-					aria-label="Close page thumbnails"
-					onClick={onClose}
-				>
-					×
-				</button>
 			</header>
-			<form className="PdfPageSidebar-jump" onSubmit={submitPage}>
-				<label htmlFor="PdfPageSidebar-pageInput">Go to page</label>
-				<div>
+			<form className="PdfPageSidebar-jump" onSubmit={handlePageSubmit}>
+				<span>Page</span>
+				{isEditingPage ? (
 					<input
 						ref={inputRef}
 						id="PdfPageSidebar-pageInput"
 						type="number"
 						min={1}
-						max={pdf.pages.length}
 						step={1}
 						value={pageInput}
-						placeholder={String(currentPage + 1)}
 						onChange={(event) => setPageInput(event.target.value)}
 						onKeyDown={(event) => event.stopPropagation()}
+						onBlur={() => setIsEditingPage(false)}
+						aria-label="Page number"
 					/>
-					<button type="submit">Go</button>
-				</div>
-				<small>
-					Page {currentPage + 1} of {pdf.pages.length} · ⌘⌥G
-				</small>
+				) : (
+					<button
+						className="PdfPageSidebar-currentPage"
+						type="button"
+						title="Click to specify a page to jump to"
+						onClick={() => {
+							setPageInput(String(currentPage + 1))
+							setIsEditingPage(true)
+						}}
+					>
+						{currentPage + 1}
+					</button>
+				)}
+				<span>
+					of {pdf.pages.length}
+					{isMacOS && ' · ⌘⌥G'}
+				</span>
 			</form>
 			<nav className="PdfPageSidebar-thumbnails" aria-label="Page thumbnails">
 				{pdf.pages.map((page, index) => (
-					<button
+					<TldrawUiButton
 						key={page.shapeId}
 						className="PdfPageSidebar-thumbnail"
-						type="button"
+						type="normal"
 						aria-label={`Go to page ${index + 1}`}
 						aria-current={currentPage === index ? 'page' : undefined}
 						onClick={() => goToPage(index + 1)}
+						style={{
+							display: 'grid',
+							gridTemplateColumns: 'minmax(0, 1fr)',
+							alignContent: 'start',
+							gap: 4,
+							width: '100%',
+							minWidth: 0,
+							height: 'auto',
+							minHeight: 0,
+							flex: '0 0 auto',
+							boxSizing: 'border-box',
+							padding: 6,
+							color: currentPage === index ? '#222' : '#555',
+							background: 'transparent',
+							borderColor: currentPage === index ? '#4a90e2' : 'transparent',
+						}}
 					>
-						<img src={page.src} alt="" loading="lazy" draggable={false} />
-						<span>{index + 1}</span>
-					</button>
+						<img
+							src={page.src}
+							alt={"Preview of page " + (index + 1)}
+							loading="lazy"
+							draggable={false}
+							style={{
+								display: 'block',
+								width: '100%',
+								maxWidth: '100%',
+								height: 'auto',
+								maxHeight: 'none',
+								objectFit: 'contain',
+								background: 'transparent',
+							}}
+						/>
+						<TldrawUiButtonLabel>{index + 1}</TldrawUiButtonLabel>
+					</TldrawUiButton>
 				))}
 			</nav>
 			<div
@@ -186,13 +233,15 @@ export function PdfPageSidebar({
 				aria-orientation="vertical"
 				aria-valuenow={width}
 				aria-valuemin={180}
-				aria-valuemax={Math.min(520, Math.max(240, window.innerWidth - 120))}
+				aria-valuemax={getMaxSidebarWidth()}
 				tabIndex={0}
 				onPointerDown={startResize}
 				onKeyDown={(event) => {
 					if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
 					event.preventDefault()
-					onWidthChange(Math.min(Math.max(width + (event.key === 'ArrowRight' ? 16 : -16), 180), 520))
+					onWidthChange(
+						Math.min(Math.max(width + (event.key === 'ArrowRight' ? 16 : -16), 180), getMaxSidebarWidth())
+					)
 				}}
 			/>
 		</aside>

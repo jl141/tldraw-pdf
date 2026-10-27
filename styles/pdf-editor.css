@@ -23,7 +23,7 @@
 }
 .PdfEditor .PdfPageSidebar {
 	position: relative;
-	z-index: var(--tl-layer-panels);
+	z-index: 20;
 	display: flex;
 	flex: 0 0 auto;
 	flex-direction: column;
@@ -31,89 +31,56 @@
 	max-width: min(520px, calc(100vw - 120px));
 	height: 100%;
 	overflow: hidden;
-	color: var(--tl-color-text);
-	background: var(--tl-color-low);
-	border-right: 1px solid var(--tl-color-divider);
-	box-shadow: var(--tl-shadow-1);
+	color: #222;
+	background: #f8f8f8;
+	border-right: 1px solid #d8d8d8;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
 }
 .PdfEditor .PdfPageSidebar-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	flex: 0 0 auto;
-	padding: 12px 14px;
-	border-bottom: 1px solid var(--tl-color-divider);
+	padding: 12px 14px 4px;
 }
 .PdfEditor .PdfPageSidebar-heading {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	font-size: 13px;
-}
-.PdfEditor .PdfPageSidebar-heading span,
-.PdfEditor .PdfPageSidebar-jump small {
-	color: var(--tl-color-text-3);
-	font-size: 11px;
-}
-.PdfEditor .PdfPageSidebar-close {
-	display: none;
-	width: 28px;
-	height: 28px;
-	padding: 0;
-	color: var(--tl-color-text-2);
-	background: transparent;
-	border: 0;
-	border-radius: 6px;
-	font: inherit;
-	font-size: 20px;
-	line-height: 1;
-	cursor: pointer;
-}
-.PdfEditor .PdfPageSidebar-close:hover {
-	background: var(--tl-color-muted-1);
+	font-size: 14px;
 }
 .PdfEditor .PdfPageSidebar-jump {
-	display: grid;
-	gap: 6px;
-	flex: 0 0 auto;
-	padding: 12px;
-	border-bottom: 1px solid var(--tl-color-divider);
-}
-.PdfEditor .PdfPageSidebar-jump label {
-	color: var(--tl-color-text-2);
-	font-size: 11px;
-	font-weight: 600;
-}
-.PdfEditor .PdfPageSidebar-jump > div {
 	display: flex;
-	gap: 6px;
-}
-.PdfEditor .PdfPageSidebar-jump input {
-	width: 0;
-	min-width: 0;
-	flex: 1 1 auto;
-	box-sizing: border-box;
-	padding: 6px 8px;
-	color: var(--tl-color-text);
-	background: var(--tl-color-background);
-	border: 1px solid var(--tl-color-divider);
-	border-radius: 6px;
-	font: inherit;
+	align-items: center;
+	gap: 4px;
+	flex: 0 0 auto;
+	padding: 4px 14px 12px;
+	border-bottom: 1px solid #d8d8d8;
 	font-size: 12px;
+	white-space: nowrap;
 }
-.PdfEditor .PdfPageSidebar-jump button {
-	padding: 0 10px;
-	color: var(--tl-color-text);
-	background: var(--tl-color-muted-1);
-	border: 1px solid var(--tl-color-text-3);
-	border-radius: 6px;
+.PdfEditor .PdfPageSidebar-currentPage {
+	margin: 0;
+	padding: 0 2px;
+	border: 0;
+	border-radius: 3px;
+	color: inherit;
+	background: transparent;
 	font: inherit;
-	font-size: 12px;
 	cursor: pointer;
 }
-.PdfEditor .PdfPageSidebar-jump button:hover {
-	background: var(--tl-color-muted-2);
-	border-color: var(--tl-color-text-1);
+.PdfEditor .PdfPageSidebar-currentPage:hover {
+	background: #eee;
+}
+.PdfEditor .PdfPageSidebar-jump input {
+	width: 52px;
+	min-width: 0;
+	box-sizing: border-box;
+	padding: 2px 4px;
+	color: #555;
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 12px;
 }
 .PdfEditor .PdfPageSidebar-thumbnails {
 	display: flex;
@@ -133,9 +100,8 @@
 	gap: 5px;
 	justify-items: center;
 	padding: 8px;
-	color: var(--tl-color-text-2);
 	background: transparent;
-	border: 2px solid transparent;
+  border: 2px solid transparent;
 	border-radius: 8px;
 	font: inherit;
 	font-size: 11px;
@@ -146,16 +112,11 @@
 	width: 100%;
 	max-height: 220px;
 	object-fit: contain;
-	background: var(--tl-color-muted-1);
-	box-shadow: var(--tl-shadow-1);
+	background: #eee;
+	box-shadow: 0 1px 4px rgb(0 0 0 / 16%);
 }
 .PdfEditor .PdfPageSidebar-thumbnail:hover {
-	background: var(--tl-color-muted-1);
-}
-.PdfEditor .PdfPageSidebar-thumbnail[aria-current='page'] {
-	color: var(--tl-color-text);
-	background: var(--tl-color-muted-1);
-	border-color: var(--tl-color-selected);
+	background: #eee !important;
 }
 .PdfEditor .PdfPageSidebar-resizeHandle {
 	position: absolute;
@@ -169,11 +130,11 @@
 }
 .PdfEditor .PdfPageSidebar-resizeHandle:hover,
 .PdfEditor .PdfPageSidebar[data-resizing='true'] .PdfPageSidebar-resizeHandle {
-	background: var(--tl-color-selected);
-	opacity: 0.35;
+	background: #4a90e2;
+	opacity: 0.25;
 }
 .PdfEditor .PdfPageSidebar-resizeHandle:focus-visible {
-	outline: 2px solid var(--tl-color-focus);
+	outline: 2px solid #4a90e2;
 	outline-offset: -2px;
 }
 .PdfEditor .PdfSidebarToggle {
@@ -181,13 +142,13 @@
 	position: absolute;
 	top: 12px;
 	left: 12px;
-	z-index: var(--tl-layer-panels);
+	z-index: 20;
 	padding: 8px 10px;
-	color: var(--tl-color-text);
-	background: var(--tl-color-panel);
-	border: 1px solid var(--tl-color-divider);
+	color: #222;
+	background: #f8f8f8;
+	border: 1px solid #d8d8d8;
 	border-radius: 8px;
-	box-shadow: var(--tl-shadow-1);
+	box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
 	font: inherit;
 	font-size: 12px;
 	cursor: pointer;
@@ -490,9 +451,9 @@
 		width: min(280px, calc(100vw - 24px)) !important;
 		max-width: none;
 		height: auto;
-		border: 1px solid var(--tl-color-divider);
+		border: 1px solid #d8d8d8;
 		border-radius: 10px;
-		box-shadow: var(--tl-shadow-2);
+		box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
 	}
 	.PdfEditor .PdfPageSidebar-close,
 	.PdfEditor .PdfSidebarToggle {
