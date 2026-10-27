@@ -9,6 +9,7 @@ import {
 	TLImageShape,
 	TLShapeId,
 	TLShapePartial,
+	TLUiOverrides,
 	TldrawUiMenuItem,
 	Tldraw,
 	getIndicesBetween,
@@ -75,6 +76,27 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 					</button>
 				</>
 			),
+		}),
+		[pdf]
+	)
+
+	const overrides = useMemo<TLUiOverrides>(
+		() => ({
+			actions: (editor, actions) => ({
+				...actions,
+				'pdf-zoom-to-page': {
+					id: 'pdf-zoom-to-page',
+					label: 'Zoom to page',
+					kbd: 'shift+3',
+					onSelect: () => zoomToPage(editor, pdf),
+				},
+				'pdf-toggle-sidebar': {
+					id: 'pdf-toggle-sidebar',
+					label: 'Toggle sidebar',
+					kbd: 'shift+q',
+					onSelect: () => setIsSidebarOpen((open) => !open),
+				},
+			}),
 		}),
 		[pdf]
 	)
@@ -210,6 +232,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 				return stopReacting
 					}}
 					components={components}
+					overrides={overrides}
 					persistenceKey={pdf.id}
 				/>
 			</div>
@@ -232,21 +255,25 @@ function PdfZoomMenu({
 			<TldrawUiMenuItem
 				id="pdf-zoom-to-page"
 				label="Zoom to page"
-				onSelect={() => {
-					const pageIndex = getCurrentPageIndex(editor, pdf)
-					editor.zoomToBounds(getRowBounds(editor, pdf, pageIndex), {
-						inset: 48,
-						animation: { duration: 200 },
-					})
-				}}
+				onSelect={() => zoomToPage(editor, pdf)}
+        kbd="shift+3"
 			/>
 			<TldrawUiMenuItem
 				id="pdf-toggle-sidebar"
-				label="Toggle page sidebar"
+				label="Toggle sidebar"
 				onSelect={onToggleSidebar}
+        kbd="shift+q"
 			/>
 		</DefaultZoomMenu>
 	)
+}
+
+function zoomToPage(editor: Editor, pdf: Pdf) {
+	const pageIndex = getCurrentPageIndex(editor, pdf)
+	editor.zoomToBounds(getRowBounds(editor, pdf, pageIndex), {
+		inset: 48,
+		animation: { duration: 200 },
+	})
 }
 
 /*
