@@ -257,7 +257,7 @@
 .PdfEditor .PdfPicker-openButton {
 	width: 100%;
 	color: var(--tl-color-selected-contrast, #fff);
-	background: var(--tl-color-primary, #3673f5);
+	background: var(--tl-color-primary, #368eff);
 }
 .PdfEditor .PdfPicker-openButton:hover {
 	filter: brightness(1.08);

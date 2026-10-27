@@ -237,7 +237,7 @@ export function PdfPageSidebar({
 							padding: 6,
 							color: currentPage === index ? '#222' : '#555',
 							background: 'transparent',
-							borderColor: currentPage === index ? '#4a90e2' : 'transparent',
+							borderColor: currentPage === index ? '#368eff' : 'transparent',
 						}}
 					>
 						<img
