@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
 	Box,
+	DefaultMainMenu,
+	DefaultMainMenuContent,
 	DefaultZoomMenu,
 	DefaultZoomMenuContent,
 	Editor,
@@ -56,11 +58,21 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 			PageMenu: null,
 			OnTheCanvas: () => <PageOverlayScreen pdf={pdf} />,
 			SharePanel: () => <ExportPdfButton pdf={pdf} />,
+			MainMenu: () => (
+				<DefaultMainMenu>
+					<div>
+						<TldrawUiMenuItem
+							id="pdf-toggle-sidebar"
+							label="Toggle sidebar"
+							onSelect={() => setIsSidebarOpen((open) => !open)}
+							kbd="shift+q"
+						/>
+					</div>
+					<DefaultMainMenuContent />
+				</DefaultMainMenu>
+			),
 			ZoomMenu: () => (
-				<PdfZoomMenu
-					pdf={pdf}
-					onToggleSidebar={() => setIsSidebarOpen((open) => !open)}
-				/>
+				<PdfZoomMenu pdf={pdf} />
 			),
 			InFrontOfTheCanvas: () => (
 				<>
@@ -240,13 +252,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 	)
 }
 
-function PdfZoomMenu({
-	pdf,
-	onToggleSidebar,
-}: {
-	pdf: Pdf
-	onToggleSidebar(): void
-}) {
+function PdfZoomMenu({ pdf }: { pdf: Pdf }) {
 	const editor = useEditor()
 
 	return (
@@ -257,12 +263,6 @@ function PdfZoomMenu({
 				label="Zoom to page"
 				onSelect={() => zoomToPage(editor, pdf)}
         kbd="shift+3"
-			/>
-			<TldrawUiMenuItem
-				id="pdf-toggle-sidebar"
-				label="Toggle sidebar"
-				onSelect={onToggleSidebar}
-        kbd="shift+q"
 			/>
 		</DefaultZoomMenu>
 	)
