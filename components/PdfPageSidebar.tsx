@@ -41,6 +41,7 @@ export function PdfPageSidebar({
 	const [resizeIndicatorPosition, setResizeIndicatorPosition] = useState<{ x: number; y: number } | null>(
 		null
 	)
+	const isResizeIndicatorVisible = resizeIndicatorPosition !== null
 	const isMacOS = navigator.platform.startsWith('Mac')
 
 	useEffect(() => {
@@ -85,6 +86,36 @@ export function PdfPageSidebar({
 		document.addEventListener('keydown', onKeyDown, true)
 		return () => document.removeEventListener('keydown', onKeyDown, true)
 	}, [currentPage, isEditingPage, isOpen, onClose, onOpen])
+
+	useEffect(() => {
+		if (!isResizeIndicatorVisible || isResizing) return
+
+		function onPointerMove(event: PointerEvent) {
+			const handle = resizeHandleRef.current
+			const isOverHandle =
+				handle !== null && document.elementsFromPoint(event.clientX, event.clientY).includes(handle)
+			setResizeIndicatorPosition(isOverHandle ? { x: event.clientX, y: event.clientY } : null)
+		}
+
+		function onPointerOut(event: PointerEvent) {
+			if (event.relatedTarget === null) {
+				setResizeIndicatorPosition(null)
+			}
+		}
+
+		function onWindowBlur() {
+			setResizeIndicatorPosition(null)
+		}
+
+		window.addEventListener('pointermove', onPointerMove)
+		window.addEventListener('pointerout', onPointerOut)
+		window.addEventListener('blur', onWindowBlur)
+		return () => {
+			window.removeEventListener('pointermove', onPointerMove)
+			window.removeEventListener('pointerout', onPointerOut)
+			window.removeEventListener('blur', onWindowBlur)
+		}
+	}, [isResizeIndicatorVisible, isResizing])
 
 	useEffect(() => {
 		if (!isResizing) return
@@ -178,7 +209,7 @@ export function PdfPageSidebar({
 			className="PdfPageSidebar"
 			data-open={isOpen}
 			data-resizing={isResizing}
-			data-resize-hovered={resizeIndicatorPosition !== null && !isResizing}
+			data-resize-hovered={isResizeIndicatorVisible && !isResizing}
 			style={{ width, maxWidth: getMaxSidebarWidth() }}
 			aria-label="PDF pages"
 			onPointerDown={(event) => event.stopPropagation()}
