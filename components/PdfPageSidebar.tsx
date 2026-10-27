@@ -31,11 +31,15 @@ export function PdfPageSidebar({
 	onClose,
 }: PdfPageSidebarProps) {
 	const inputRef = useRef<HTMLInputElement>(null)
+	const resizeHandleRef = useRef<HTMLDivElement>(null)
 	const drag = useRef<{ pointerX: number; width: number } | null>(null)
 	const [currentPage, setCurrentPage] = useState(0)
 	const [pageInput, setPageInput] = useState('')
 	const [isEditingPage, setIsEditingPage] = useState(false)
 	const [isResizing, setIsResizing] = useState(false)
+	const [resizeIndicatorPosition, setResizeIndicatorPosition] = useState<{ x: number; y: number } | null>(
+		null
+	)
 	const isMacOS = navigator.platform.startsWith('Mac')
 
 	useEffect(() => {
@@ -79,13 +83,15 @@ export function PdfPageSidebar({
 
 		function onPointerMove(event: PointerEvent) {
 			if (!drag.current) return
+			updateResizeIndicatorPosition(event.clientX, event.clientY)
 			const maxWidth = getMaxSidebarWidth()
 			onWidthChange(Math.min(Math.max(drag.current.width + event.clientX - drag.current.pointerX, 180), maxWidth))
 		}
 
-		function onPointerUp() {
+		function onPointerUp(event: PointerEvent) {
 			drag.current = null
 			setIsResizing(false)
+			updateResizeIndicatorPosition(event.clientX, event.clientY)
 		}
 
 		window.addEventListener('pointermove', onPointerMove)
@@ -125,12 +131,38 @@ export function PdfPageSidebar({
 		submitPage()
 	}
 
+	function isOverResizeHandle(x: number, y: number) {
+		const handle = resizeHandleRef.current
+		return handle !== null && document.elementsFromPoint(x, y).includes(handle)
+	}
+
+	function updateResizeIndicatorPosition(x: number, y: number) {
+		if (drag.current || isOverResizeHandle(x, y)) {
+			setResizeIndicatorPosition({ x, y })
+		} else {
+			setResizeIndicatorPosition(null)
+		}
+	}
+
 	function startResize(event: ReactPointerEvent<HTMLDivElement>) {
 		if (event.button !== 0) return
 		event.preventDefault()
 		event.stopPropagation()
+		event.currentTarget.setPointerCapture(event.pointerId)
 		drag.current = { pointerX: event.clientX, width }
 		setIsResizing(true)
+		updateResizeIndicatorPosition(event.clientX, event.clientY)
+	}
+
+	function handleResizeIndicatorPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+		if (isOverResizeHandle(event.clientX, event.clientY)) {
+			startResize(event)
+			return
+		}
+
+		event.preventDefault()
+		event.stopPropagation()
+		updateResizeIndicatorPosition(event.clientX, event.clientY)
 	}
 
 	return (
@@ -138,6 +170,7 @@ export function PdfPageSidebar({
 			className="PdfPageSidebar"
 			data-open={isOpen}
 			data-resizing={isResizing}
+			data-resize-hovered={resizeIndicatorPosition !== null && !isResizing}
 			style={{ width, maxWidth: getMaxSidebarWidth() }}
 			aria-label="PDF pages"
 			onPointerDown={(event) => event.stopPropagation()}
@@ -227,6 +260,7 @@ export function PdfPageSidebar({
 				))}
 			</nav>
 			<div
+				ref={resizeHandleRef}
 				className="PdfPageSidebar-resizeHandle"
 				role="separator"
 				aria-label="Resize page sidebar"
@@ -236,14 +270,30 @@ export function PdfPageSidebar({
 				aria-valuemax={getMaxSidebarWidth()}
 				tabIndex={0}
 				onPointerDown={startResize}
-				onKeyDown={(event) => {
-					if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-					event.preventDefault()
-					onWidthChange(
-						Math.min(Math.max(width + (event.key === 'ArrowRight' ? 16 : -16), 180), getMaxSidebarWidth())
-					)
-				}}
+				onPointerEnter={(event) =>
+					updateResizeIndicatorPosition(event.clientX, event.clientY)
+				}
+				onPointerMove={(event) =>
+					updateResizeIndicatorPosition(event.clientX, event.clientY)
+				}
 			/>
+			{resizeIndicatorPosition && (
+				<div
+					className="PdfPageSidebar-resizeIndicator"
+					aria-hidden="true"
+					onPointerDown={handleResizeIndicatorPointerDown}
+					onPointerMove={(event) =>
+						updateResizeIndicatorPosition(event.clientX, event.clientY)
+					}
+					onPointerLeave={(event) =>
+						updateResizeIndicatorPosition(event.clientX, event.clientY)
+					}
+					style={{
+						left: resizeIndicatorPosition.x,
+						top: resizeIndicatorPosition.y,
+					}}
+				/>
+			)}
 		</aside>
 	)
 }
