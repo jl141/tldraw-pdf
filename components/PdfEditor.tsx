@@ -78,14 +78,6 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
 				<>
 					<ScratchPageControls pdf={pdf} />
 					<PdfScrollbar pdf={pdf} />
-					<button
-						className="PdfSidebarToggle"
-						type="button"
-						aria-label="Open page thumbnails"
-						onClick={() => setIsSidebarOpen(true)}
-					>
-						Pages
-					</button>
 				</>
 			),
 		}),

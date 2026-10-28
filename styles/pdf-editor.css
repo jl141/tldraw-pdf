@@ -178,23 +178,6 @@ body,
 	cursor: col-resize;
 	pointer-events: auto;
 }
-.PdfEditor .PdfSidebarToggle {
-	display: none;
-	position: absolute;
-	top: 12px;
-	left: 12px;
-	z-index: 20;
-	padding: 8px 10px;
-	color: #222;
-	background: #f8f8f8;
-	border: 1px solid #d8d8d8;
-	border-radius: 8px;
-	box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
-	font: inherit;
-	font-size: 12px;
-	cursor: pointer;
-	pointer-events: all;
-}
 .PdfEditor .PdfPageSidebar[data-open='false'] {
 	display: none;
 }
@@ -496,8 +479,7 @@ body,
 		border-radius: 10px;
 		box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
 	}
-	.PdfEditor .PdfPageSidebar-close,
-	.PdfEditor .PdfSidebarToggle {
+	.PdfEditor .PdfPageSidebar-close {
 		display: block;
 	}
 	.PdfEditor .PdfPageSidebar-resizeHandle {
