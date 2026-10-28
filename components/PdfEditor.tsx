@@ -32,6 +32,7 @@ import {
 	getScratchPages,
 } from '../utils/scratchPages'
 import { getCurrentPageIndex } from '../utils/pdfPages'
+import { isMobile } from '../utils/viewport'
 
 const shapeUtils = [ScratchPageShapeUtil]
 
@@ -209,7 +210,7 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
         screens; the `react` callback re-applies the constraints when the viewport crosses that
         threshold. Returning its disposer from `onMount` stops it when the editor unmounts.
         */
-				let isMobile = editor.getViewportScreenBounds().width < 840
+				let mobile = isMobile(editor)
 				let boundsKey = ''
 				const scratchKey = () =>
 					getScratchPages(editor)
@@ -222,11 +223,11 @@ export function PdfEditor({ pdf }: { pdf: Pdf }) {
         change (add, delete, undo, redo, reload). Only crossing the mobile threshold resets the camera.
         */
 				const stopReacting = react('update camera', () => {
-					const isMobileNow = editor.getViewportScreenBounds().width < 840
+					const isMobileNow = isMobile(editor)
 					const key = scratchKey()
-					if (isMobileNow === isMobile && key === boundsKey) return
-					const crossedThreshold = isMobileNow !== isMobile
-					isMobile = isMobileNow
+					if (isMobileNow === mobile && key === boundsKey) return
+					const crossedThreshold = isMobileNow !== mobile
+					mobile = isMobileNow
 					boundsKey = key
 					applyCameraConstraints(editor, pdf, crossedThreshold)
 				})

@@ -5,6 +5,7 @@ import {
 	type ScratchSide,
 } from '../components/ScratchPageShape'
 import type { Pdf } from '../types/pdfTypes'
+import { isMobile } from './viewport'
 
 export const PDF_PADDING_Y = 64
 
@@ -40,11 +41,11 @@ export function getRowBounds(editor: Editor, pdf: Pdf, pageIndex: number) {
 }
 
 export function applyCameraConstraints(editor: Editor, pdf: Pdf, reset: boolean) {
-	const isMobile = editor.getViewportScreenBounds().width < 840
+	const mobile = isMobile(editor)
 	editor.setCameraOptions({
 		constraints: {
 			bounds: getDocumentBounds(editor, pdf),
-			padding: { x: isMobile ? 16 : 164, y: PDF_PADDING_Y },
+			padding: { x: mobile ? 16 : 164, y: PDF_PADDING_Y },
 			origin: { x: 0.5, y: 0 },
 			initialZoom: 'fit-x-100',
 			baseZoom: 'default',
